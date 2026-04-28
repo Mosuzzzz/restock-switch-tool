@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "restock.modid.mixin.client",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"MultiPlayerGameModeMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

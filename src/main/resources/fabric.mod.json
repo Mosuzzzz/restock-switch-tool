@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "restockitem",
+	"version": "${version}",
+	"name": "RestockItem",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/restockitem/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"restock.modid.RestockItem"
+		],
+		"client": [
+			"restock.modid.client.RestockItemClient"
+		],
+		"fabric-datagen": [
+			"restock.modid.client.RestockItemDataGenerator"
+		]
+	},
+	"mixins": [
+		"restockitem.mixins.json",
+		{
+			"config": "restockitem.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.2",
+		"minecraft": "~26.1.2",
+		"java": ">=26",
+		"fabric-api": "*"
+	}
+}
