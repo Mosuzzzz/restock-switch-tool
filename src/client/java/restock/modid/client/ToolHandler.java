@@ -1,7 +1,9 @@
 package restock.modid.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,9 +42,18 @@ public class ToolHandler {
             }
         }
 
-        // If we found a better tool, switch to it
+        // If we found a better tool, switch to it.
         if (bestSlot != currentSlot) {
             inventory.setSelectedSlot(bestSlot);
+
+            // Tell the server about the slot change. Changing the selected slot
+            // client-side only is not enough: the server computes break speed and
+            // drops from the slot it last knew about, so without this packet the
+            // held item desyncs and the wrong tool is used server-side.
+            ClientPacketListener connection = client.getConnection();
+            if (connection != null) {
+                connection.send(new ServerboundSetCarriedItemPacket(bestSlot));
+            }
         }
     }
 }

@@ -2,14 +2,13 @@
 	"schemaVersion": 1,
 	"id": "restockitem",
 	"version": "${version}",
-	"name": "RestockItem",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "RestockItem & AutoTool",
+	"description": "Automatically refills your active hotbar/off-hand slot from your inventory when a stack runs out, and switches to the best tool when you start breaking a block.",
 	"authors": [
-		"Me!"
+		"Mosuzzzz"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/Mosuzzzz/restockitem"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/restockitem/icon.png",

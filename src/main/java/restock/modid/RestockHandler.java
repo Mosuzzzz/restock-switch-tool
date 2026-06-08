@@ -27,20 +27,18 @@ public class RestockHandler {
         
         if (!isSelected && !isOffhand) return;
 
-        // 2. Avoid restocking if the player is currently moving items in a menu.
-        // If they have an item on their cursor (carried), they are likely dragging/organizing.
-        if (!player.containerMenu.getCarried().isEmpty()) {
+        // 2. Avoid restocking if the player has a container screen open (Chest,
+        // Crafting Table, etc.). containerMenu is never null; it equals inventoryMenu
+        // when no external GUI is open. Any other menu means the player is actively
+        // managing items, so we stay out of the way.
+        if (player.containerMenu != player.inventoryMenu) {
             return;
         }
 
-        // 3. Avoid restocking if the player has an actual screen open (Chest, Crafting Table, etc.)
-        // Note: containerMenu is never null; it points to inventoryMenu when no GUI is open.
-        // However, in many versions, the player's inventory screen also uses inventoryMenu.
-        // A common trick is to check if the current menu is the base inventory AND if it's the "player" screen.
-        if (player instanceof ServerPlayer serverPlayer) {
-            // If the player is in any menu other than their basic survival inventory/HUD, skip.
-            // This is a bit tricky to detect perfectly on server, but checking carried stack
-            // is usually the most important part for "dragging".
+        // 3. Avoid restocking while the player is dragging an item on their cursor
+        // (carried stack), which indicates manual organization in the inventory.
+        if (!player.containerMenu.getCarried().isEmpty()) {
+            return;
         }
 
         if (itemType == null || itemType.isEmpty()) return;

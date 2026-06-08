@@ -34,5 +34,5 @@ This project uses Gradle. To build the mod from source:
 The resulting JAR will be in `build/libs/`.
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is released under the CC0 1.0 Universal license - see the [LICENSE](LICENSE) file for details.
 

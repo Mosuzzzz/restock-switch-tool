@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"package": "restock.modid.mixin.client",
-	"compatibilityLevel": "JAVA_25",
+	"compatibilityLevel": "JAVA_26",
 	"mixins": [
 		"MultiPlayerGameModeMixin"
 	],

@@ -2,6 +2,7 @@ package restock.modid.mixin;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,14 +33,13 @@ public abstract class PlayerInventoryMixin {
     public abstract int getContainerSize();
 
     /**
-     * Stores the item type that was in each slot during the previous tick.
-     * We only care about the Item, not the count.
+     * The item type that occupied each slot during the previous tick, or null if
+     * the slot was empty. We only care about the Item identity (to know what to
+     * refill with), not the count, so we store a lightweight reference instead of
+     * copying every ItemStack each tick — this runs every tick for every player.
      */
     @Unique
-    private final ItemStack[] restockitem$lastState = new ItemStack[100]; // Plenty of space for any inventory size
-
-    @Unique
-    private boolean restockitem$initialized = false;
+    private Item[] restockitem$lastItem = null;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void restockitem$onTick(CallbackInfo ci) {
@@ -47,39 +47,33 @@ public abstract class PlayerInventoryMixin {
         if (player.level().isClientSide()) return;
 
         int size = this.getContainerSize();
-        
-        // Ensure array is large enough (though 100 is usually enough for Player inventory)
-        if (size > restockitem$lastState.length) return;
+
+        // Lazily size the snapshot to the actual inventory size.
+        if (restockitem$lastItem == null || restockitem$lastItem.length != size) {
+            restockitem$lastItem = new Item[size];
+        }
 
         for (int i = 0; i < size; i++) {
             ItemStack current = this.getItem(i);
-            ItemStack last = restockitem$lastState[i];
+            Item last = restockitem$lastItem[i];
 
             // If a slot was not empty but is now empty
-            if (current.isEmpty() && last != null && !last.isEmpty()) {
-                // Only restock hotbar (0-8) and off-hand (40)
-                // In Inventory class: 0-8 is hotbar, 40 is offhand
+            if (current.isEmpty() && last != null) {
+                // Only restock hotbar (0-8) and off-hand (40).
+                // In Inventory class: 0-8 is hotbar, 40 is offhand.
                 boolean isHotbar = (i >= 0 && i < 9);
-                boolean isOffhand = (i == 40);
-                
+                boolean isOffhand = (i == Inventory.SLOT_OFFHAND);
+
                 if (isHotbar || isOffhand) {
-                    restock.modid.RestockItem.LOGGER.info("[RestockItem] Slot {} became empty (was {}). Restocking...", i, last.getItem());
-                    RestockHandler.restockForItem(player, i, last);
-                    
-                    // After restock, update 'last' so we don't trigger again immediately
-                    // The restockForItem call will set the slot to the new stack.
-                    // We'll capture that in the next tick or update it now.
-                    restockitem$lastState[i] = this.getItem(i).copy();
-                    continue;
+                    restock.modid.RestockItem.LOGGER.info("[RestockItem] Slot {} became empty (was {}). Restocking...", i, last);
+                    RestockHandler.restockForItem(player, i, new ItemStack(last));
                 }
             }
 
-            // Update last known state (copy to avoid modification issues)
-            if (!current.isEmpty()) {
-                restockitem$lastState[i] = current.copy();
-            } else {
-                restockitem$lastState[i] = null;
-            }
+            // Update last known state. After a successful restock the slot is now
+            // populated again, so re-reading here keeps the snapshot accurate.
+            ItemStack updated = this.getItem(i);
+            restockitem$lastItem[i] = updated.isEmpty() ? null : updated.getItem();
         }
     }
 }
