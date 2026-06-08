@@ -1,7 +1,6 @@
 {
 	"required": true,
 	"package": "restock.modid.mixin",
-	"compatibilityLevel": "JAVA_26",
 	"mixins": [
 		"PlayerInventoryMixin"
 	],
